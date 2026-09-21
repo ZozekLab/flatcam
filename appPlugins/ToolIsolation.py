@@ -2330,7 +2330,9 @@ class ToolIsolation(Gerber, AppTool):
 
         total_solid_geometry = []
 
-        iso_name = iso_obj.obj_options["name"] + '_iso_combined'
+        source_name = iso_obj.obj_options["name"]
+        iso_name = source_name.rsplit('.', 1)[0] + '_iso_combined' if '.' in source_name else source_name + '_iso_combined'
+
         geometry = iso2geo
         if prog_plot is None:
             prog_plot = self.app.options["tools_iso_plotting"]
