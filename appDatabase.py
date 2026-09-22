@@ -293,7 +293,7 @@ class ToolsDB2UI:
               "L = laser")
         )
 
-        self.mill_shape_combo = FCComboBox()
+        self.mill_shape_combo = FCComboBox2(policy=False)
         self.mill_shape_combo.addItems(self.tool_job_options)
         self.mill_shape_combo.setObjectName('gdb_shape')
 
@@ -344,7 +344,7 @@ class ToolsDB2UI:
             )
         )
 
-        self.job_type_combo = FCComboBox()
+        self.job_type_combo = FCComboBox2(policy=False)
         self.job_type_combo.addItems(self.job_item_options)
         self.job_type_combo.setObjectName('gdb_job')
 
@@ -2274,7 +2274,7 @@ class ToolsDB2(QtWidgets.QWidget):
         self.on_save_tools_db()
 
     def on_calculate_tooldia(self):
-        if self.ui.mill_shape_combo.get_value() == 'V':
+        if self.ui.mill_shape_combo.get_value() == 5:  # 'V'
             tip_dia = float(self.ui.mill_vdia_entry.get_value())
             half_tip_angle = float(self.ui.mill_vangle_entry.get_value()) / 2.0
             cut_z = float(self.ui.mill_cutz_entry.get_value())
@@ -2487,7 +2487,7 @@ class ToolsDB2(QtWidgets.QWidget):
         elif wdg_name == "gdb_dia":
             self.db_tool_dict[tool_id]['tooldia'] = val
         elif wdg_name == "gdb_job":
-            self.db_tool_dict[tool_id]['data']['job'] = val
+            self.db_tool_dict[tool_id]['data']['tools_mill_job_type'] = val
         elif wdg_name == "gdb_shape":
             self.db_tool_dict[tool_id]['data']['tools_mill_tool_shape'] = val
         else:
