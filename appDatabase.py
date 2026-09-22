@@ -1916,6 +1916,8 @@ class ToolsDB2(QtWidgets.QWidget):
             "tools_mill_feedrate":         float(self.app.options["tools_mill_feedrate"]),
             "tools_mill_feedrate_z":       float(self.app.options["tools_mill_feedrate_z"]),
             "tools_mill_feedrate_rapid":   float(self.app.options["tools_mill_feedrate_rapid"]),
+            "tools_mill_min_power":        float(self.app.options["tools_mill_min_power"]),
+            "tools_mill_laser_on":         self.app.options["tools_mill_laser_on"],
             "tools_mill_spindlespeed":     self.app.options["tools_mill_spindlespeed"],
             "tools_mill_dwell":            self.app.options["tools_mill_dwell"],
             "tools_mill_dwelltime":        float(self.app.options["tools_mill_dwelltime"]),
