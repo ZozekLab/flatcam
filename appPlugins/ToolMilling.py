@@ -732,7 +732,6 @@ class ToolMilling(Excellon, AppTool):
 
                         tool_data['tools_mill_offset_type'] = 0  # 'Path'
                         tool_data['tools_mill_offset_value'] = 0.0
-                        tool_data['tools_mill_job_type'] = 0    # _('Roughing')
 
                         # we made the decision here what to do with the hidden parameters
                         # some will disable some of the hidden features but other are set by
@@ -794,7 +793,6 @@ class ToolMilling(Excellon, AppTool):
 
                         tool_data['tools_mill_offset_type'] = app_defaults['tools_mill_offset_type']
                         tool_data['tools_mill_offset_value'] = app_defaults['tools_mill_offset_value']
-                        tool_data['tools_mill_job_type'] = app_defaults['tools_mill_job_type']
 
                         # we made the decision here what to do with the hidden parameters
                         # some will disable some of the hidden features but other are set by
