@@ -2284,6 +2284,7 @@ class ToolsDB2(QtWidgets.QWidget):
             tool_dia = tip_dia + (2 * cut_z * math.tan(math.radians(half_tip_angle)))
 
             self.ui.dia_entry.set_value(tool_dia)
+            self.update_tree_tooldia()
 
     def ui_connect(self):
         # make sure that we don't make multiple connections to the widgets
