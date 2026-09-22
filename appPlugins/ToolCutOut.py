@@ -270,14 +270,14 @@ class CutOut(AppTool):
         self.ui.gaptype_combo.set_value(self.app.options["tools_cutout_gap_type"])
         self.ui.on_gap_type_radio(self.ui.gaptype_combo.get_value())
 
+        # set as default the automatic adding of gaps
+        self.ui.cutout_type_radio.set_value('a')
+        self.on_cutout_type(val='a')
+
         # add a default tool
         self.ui.dia.set_value(float(self.app.options["tools_cutout_tooldia"]))
         tool_dia = float(self.app.options["tools_cutout_tooldia"])
         self.on_tool_add(custom_dia=tool_dia)
-
-        # set as default the automatic adding of gaps
-        self.ui.cutout_type_radio.set_value('a')
-        self.on_cutout_type(val='a')
 
         self.ui.cutout_shape_cb.set_value(False)
         self.on_cutout_shape_changed(self.ui.cutout_shape_cb.get_value())
@@ -391,7 +391,7 @@ class CutOut(AppTool):
         self.ui.margin.set_value(float(tool_dict["tools_cutout_margin"]))
         self.ui.gapsize.set_value(float(tool_dict["tools_cutout_gapsize"]))
         self.ui.gaptype_combo.set_value(tool_dict["tools_cutout_gap_type"])
-        self.on_cutout_type(self.ui.gaptype_combo.get_value())
+        self.on_cutout_type(self.ui.cutout_type_radio.get_value())
 
         self.ui.thin_depth_entry.set_value(float(tool_dict["tools_cutout_gap_depth"]))
         self.ui.mb_dia_entry.set_value(float(tool_dict["tools_cutout_mb_dia"]))

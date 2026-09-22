@@ -1151,9 +1151,9 @@ class ToolsDB2UI:
 
         self.cutout_gaptype_radio = RadioSet(
             [
-                {'label': _('Bridge'), 'value': 'b'},
-                {'label': _('Thin'), 'value': 'bt'},
-                {'label': "M-Bites", 'value': 'mb'}
+                {'label': _('Bridge'), 'value': 0},
+                {'label': _('Thin'), 'value': 1},
+                {'label': "M-Bites", 'value': 2}
             ],
             compact=True
         )
