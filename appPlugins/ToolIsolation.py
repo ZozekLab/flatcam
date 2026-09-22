@@ -676,8 +676,8 @@ class ToolIsolation(Gerber, AppTool):
 
         # V-shape tool parameters changes
         self.ui.cutz_entry.editingFinished.connect(self.on_update_tool_dia)
-        self.ui.tipdia_entry.editingFinished.connect(self.on_update_tool_dia)
-        self.ui.tipangle_entry.editingFinished.connect(self.on_update_tool_dia)
+        self.ui.tipdia_entry.editingFinished.connect(self.on_vtool_param_changed)
+        self.ui.tipangle_entry.editingFinished.connect(self.on_vtool_param_changed)
 
         # rows selected
         self.ui.tools_table.clicked.connect(self.on_row_selection_change)
@@ -797,9 +797,57 @@ class ToolIsolation(Gerber, AppTool):
     def ui_update_v_shape(self, tool_type_txt):
         if tool_type_txt == 5:  # 'V'
             self.ui.v_frame.show()
-            self.on_update_tool_dia()
+            self.on_update_cutz()
             return
         self.ui.v_frame.hide()
+
+    def on_vtool_param_changed(self):
+        # First store the edited V-tool parameter in self.iso_tools.
+        self.form_to_storage()
+
+        # Then calculate Cut Z using the updated tool data.
+        self.on_update_cutz()
+
+    def on_update_cutz(self):
+        if not self.ui.v_frame.isVisible():
+            return
+
+        row = self.ui.tools_table.currentRow()
+        tool_uid_item = self.ui.tools_table.item(row, 3)
+        if tool_uid_item is None:
+            return
+        tool_uid = int(tool_uid_item.text())
+
+        tool_dia_item = self.ui.tools_table.item(row, 1)
+        if tool_dia_item is None:
+            return
+        tooldia = float(tool_dia_item.text())
+
+        vdia = float(self.ui.tipdia_entry.get_value())
+        half_vangle = float(self.ui.tipangle_entry.get_value()) / 2
+
+        if tooldia < vdia:
+            self.app.inform.emit(
+                '[WARNING_NOTCL] %s' %
+                _("Tool Dia cannot be smaller than V-Tip Dia.")
+            )
+            return
+
+        try:
+            new_cutz = (tooldia - vdia) / (2 * math.tan(math.radians(half_vangle)))
+        except ZeroDivisionError:
+            return
+
+        new_cutz = self.app.dec_format(new_cutz, self.decimals) * -1.0
+
+        if new_cutz == 0:
+            self.app.inform.emit(
+                '[WARNING_NOTCL] %s' %
+                _("Cut Z is zero for the current V-tool parameters.")
+            )
+
+        self.ui.cutz_entry.set_value(new_cutz)
+        self.iso_tools[tool_uid]['data']['tools_mill_cutz'] = new_cutz
 
     def on_update_tool_dia(self):
         if not self.ui.v_frame.isVisible():
@@ -931,6 +979,12 @@ class ToolIsolation(Gerber, AppTool):
                                     self.storage_to_form(tooluid_value['data'])
                 except Exception as e:
                     self.app.log.error("ToolIsolation ---> update_ui() " + str(e))
+
+                # update V-shape parameters visibility after loading tool data
+                if self.ui.tool_shape_combo.get_value() == 5:  # 'V'
+                    self.ui.v_frame.show()
+                else:
+                    self.ui.v_frame.hide()
             else:
                 self.ui.tool_data_label.setText(
                     "<b>%s: <font color='#0000FF'>%s</font></b>" % (_('Parameters for'), _("Multiple Tools"))
@@ -1554,14 +1608,44 @@ class ToolIsolation(Gerber, AppTool):
 
         # identify the tool that was edited and get it's tooluid
         if new_tool_dia not in tool_dias:
+            v_tool_warning = False
             try:
-                self.iso_tools[editeduid]['tooldia'] = deepcopy(float('%.*f' % (self.decimals, new_tool_dia)))
+                new_tool_dia = deepcopy(float('%.*f' % (self.decimals, new_tool_dia)))
+                self.iso_tools[editeduid]['tooldia'] = new_tool_dia
+                self.iso_tools[editeduid]['data']['tools_iso_tooldia'] = new_tool_dia
+
+                # For V-tools, changing Tool Dia changes the required Cut Z.
+                if self.iso_tools[editeduid]['data']['tools_mill_tool_shape'] == 5:  # 'V'
+                    vdia = float(self.iso_tools[editeduid]['data']['tools_mill_vtipdia'])
+                    half_vangle = float(self.iso_tools[editeduid]['data']['tools_mill_vtipangle']) / 2
+
+                    if new_tool_dia >= vdia:
+                        new_cutz = (new_tool_dia - vdia) / (2 * math.tan(math.radians(half_vangle)))
+                        new_cutz = self.app.dec_format(new_cutz, self.decimals) * -1.0
+                        self.iso_tools[editeduid]['data']['tools_mill_cutz'] = new_cutz
+
+                        if new_cutz == 0:
+                            v_tool_warning = True
+                            self.app.inform.emit(
+                                '[WARNING_NOTCL] %s' %
+                                _("Cut Z is zero for the current V-tool parameters.")
+                            )
+
+                    else:
+                        v_tool_warning = True
+                        self.app.inform.emit(
+                            '[WARNING_NOTCL] %s' %
+                            _("Tool Dia cannot be smaller than V-Tip Dia.")
+                        )
+
             except Exception as err:
                 self.app.inform.emit('[ERROR_NOTCL] %s' % _("Failed."))
                 self.app.log.error("Failed due: %s" % str(err))
 
-            self.app.inform.emit('[success] %s' % _("Tool from Tool Table was edited."))
+            if not v_tool_warning:
+                self.app.inform.emit('[success] %s' % _("Tool from Tool Table was edited."))
             self.build_ui()
+            self.update_ui()
             return
 
         # identify the old tool_dia and restore the text in tool table
@@ -1701,6 +1785,22 @@ class ToolIsolation(Gerber, AppTool):
         if not sel_tools:
             self.app.inform.emit('[ERROR_NOTCL] %s' % _("There are no tools selected in the Tool Table."))
             return 'fail'
+
+        # Validate selected V-tools before starting isolation.
+        for tool_uid in sel_tools:
+            tool = self.iso_tools[tool_uid]
+            tool_data = tool['data']
+
+            if tool_data['tools_mill_tool_shape'] == 5:  # 'V'
+                tooldia = float(tool['tooldia'])
+                vdia = float(tool_data['tools_mill_vtipdia'])
+
+                if tooldia < vdia:
+                    self.app.inform.emit(
+                        '[ERROR_NOTCL] %s' %
+                        _("Tool Dia cannot be smaller than V-Tip Dia.")
+                    )
+                    return 'fail'
 
         selection = self.ui.select_combo.get_value()
         if selection == 0:  # ALL
