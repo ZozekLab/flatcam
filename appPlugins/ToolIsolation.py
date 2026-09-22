@@ -3016,6 +3016,9 @@ class ToolIsolation(Gerber, AppTool):
             }
         })
 
+        self.iso_tools[tooluid]['data']['seg_x'] = self.app.options['geometry_seg_x']
+        self.iso_tools[tooluid]['data']['seg_y'] = self.app.options['geometry_seg_y']
+
         self.iso_tools[tooluid]['data']['name'] = '_iso'
 
         self.app.inform.emit('[success] %s' % _("New tool added to Tool Table."))
