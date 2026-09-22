@@ -1844,6 +1844,12 @@ class ToolMilling(Excellon, AppTool):
                         except Exception:
                             # it may fail for form fields found in the tools tables if there are no rows
                             pass
+                elif option in self.general_form_fields:
+                    if k == option:
+                        try:
+                            self.general_form_fields[k].set_value(storage[option])
+                        except Exception:
+                            pass
 
     def storage_to_form(self, dict_storage):
         """
