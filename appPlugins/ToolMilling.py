@@ -1822,6 +1822,9 @@ class ToolMilling(Excellon, AppTool):
             t_table = self.ui.tools_table_mill_exc
         self.current_row = t_table.currentRow()
 
+        self.ui.tipdia_entry.blockSignals(True)
+        self.ui.tipangle_entry.blockSignals(True)
+
         for k in list(self.form_fields.keys()) + list(self.general_form_fields.keys()):
             for option in storage:
                 if option.startswith('tools_mill_'):
@@ -1851,6 +1854,9 @@ class ToolMilling(Excellon, AppTool):
                         except Exception:
                             pass
 
+        self.ui.tipdia_entry.blockSignals(False)
+        self.ui.tipangle_entry.blockSignals(False)
+
     def storage_to_form(self, dict_storage):
         """
         Will update the GUI with data from the "storage" in this case the dict "self.tools"
@@ -1875,7 +1881,15 @@ class ToolMilling(Excellon, AppTool):
                      "tools_mill_area_shape", "tools_mill_area_strategy", "tools_mill_area_overz"]:
 
                 try:
-                    self.form_fields[storage_key].set_value(dict_storage[storage_key])
+                    widget = self.form_fields[storage_key]
+
+                    if storage_key in ("tools_mill_vtipdia", "tools_mill_vtipangle"):
+                        widget.blockSignals(True)
+                        widget.set_value(dict_storage[storage_key])
+                        widget.blockSignals(False)
+                    else:
+                        widget.set_value(dict_storage[storage_key])
+
                 except Exception as e:
                     self.app.log.error(
                         "ToolMilling.storage_to_form() for key: %s with value: %s--> %s" %
@@ -1983,7 +1997,6 @@ class ToolMilling(Excellon, AppTool):
                   "NB: a value of zero means that Tool Dia = 'V-tip Dia'")
             )
             self.ui.job_type_combo.set_value(2)   # 'Isolation'
-            self.on_update_cutz()
         else:
             self.ui.tipdialabel.hide()
             self.ui.tipdia_entry.hide()
