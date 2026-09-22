@@ -2288,6 +2288,8 @@ class ToolIsolation(Gerber, AppTool):
                 if isinstance(iso_geo, (MultiLineString, MultiPolygon)):
                     for geo in iso_geo.geoms:
                         solid_geo.append(geo)
+                elif isinstance(iso_geo, list):
+                    solid_geo.extend(iso_geo)
                 else:
                     solid_geo.append(iso_geo)
 
