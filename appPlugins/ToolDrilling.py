@@ -1994,7 +1994,13 @@ class ToolDrilling(Excellon, AppTool):
         xmax = obj.obj_options['xmax']
         ymax = obj.obj_options['ymax']
 
-        job_name = obj.obj_options["name"] + "_cnc"
+        source_name = obj.obj_options["name"]
+
+        if source_name.lower().endswith(('.drl', '.xln')):
+            source_name = source_name.rsplit('.', 1)[0]
+
+        job_name = source_name + "_cnc"
+
         obj.pp_excellon_name = self.ui.pp_excellon_name_cb.get_value()
 
         if self.is_valid_excellon() is False:
