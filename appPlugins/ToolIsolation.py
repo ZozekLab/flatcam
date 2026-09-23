@@ -1623,6 +1623,14 @@ class ToolIsolation(Gerber, AppTool):
                         new_cutz = (new_tool_dia - vdia) / (2 * math.tan(math.radians(half_vangle)))
                         new_cutz = self.app.dec_format(new_cutz, self.decimals) * -1.0
                         self.iso_tools[editeduid]['data']['tools_mill_cutz'] = new_cutz
+
+                        if new_cutz == 0:
+                            v_tool_warning = True
+                            self.app.inform.emit(
+                                '[WARNING_NOTCL] %s' %
+                                _("Cut Z is zero for the current V-tool parameters.")
+                            )
+
                     else:
                         v_tool_warning = True
                         self.app.inform.emit(
