@@ -3190,8 +3190,8 @@ class ToolMilling(Excellon, AppTool):
                 spindlespeed = tools_dict[tool_uid_key]['data']["tools_mill_spindlespeed"]
                 dwell = tools_dict[tool_uid_key]['data']["tools_mill_dwell"]
                 dwelltime = tools_dict[tool_uid_key]['data']["tools_mill_dwelltime"]
-                laser_min_power = tools_dict[tool_uid_key]['data']["tools_mill_min_power"]
-                laser_on_code = tools_dict[tool_uid_key]['data']["tools_mill_laser_on"]
+                laser_min_power = tools_dict[tool_uid_key]['data'].get("tools_mill_min_power", 0.0)
+                laser_on_code = tools_dict[tool_uid_key]['data'].get("tools_mill_laser_on", "M03")
                 pp_geometry_name = tools_dict[tool_uid_key]['data']["tools_mill_ppname_g"]
 
                 spindle_dir = self.app.options['tools_mill_spindledir']

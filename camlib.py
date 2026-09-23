@@ -3934,7 +3934,7 @@ class CNCjob(Geometry):
         except KeyError:
             self.laser_min_power = 0.0
 
-        self.laser_on_code = tool_dict['tools_mill_laser_on']
+        self.laser_on_code = tool_dict.get('tools_mill_laser_on', 'M03')
 
         try:
             self.spindlespeed = float(tool_dict['tools_mill_spindlespeed'])
